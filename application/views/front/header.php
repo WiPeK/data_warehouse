@@ -9,5 +9,6 @@
 		<title>Księgarnia internetowa</title>
 		<link rel="stylesheet" type="text/css" href="<?php echo site_url(); ?>css/bootstrap.min.css">
 		<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.15/css/dataTables.bootstrap4.min.css">
+		  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.0-rc.1/css/select2.min.css" />
 	</head>
 		<body>

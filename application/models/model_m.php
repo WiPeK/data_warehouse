@@ -139,6 +139,39 @@ class Model_m extends CI_Model {
 			group by
 			month.MONTH, year.year")->result();
 	}
+
+	public function salesPercentageByAll() {
+		return $this->db->query("SELECT p.NAME, y.YEAR, SUM(s.QUANTITY) as SUMA, ROUND(100*s.QUANTITY/(SUM(s.QUANTITY) OVER(PARTITION BY p.id_product)),2) \"procent\" FROM SALES s JOIN PRODUCT p ON s.ID_PRODUCT = p.ID_PRODUCT JOIN DATA d ON s.ID_DATA = d.ID_DATA JOIN YEAR y ON d.ID_YEAR = y.ID_YEAR WHERE ROWNUM < 5000 GROUP BY p.id_product, p.NAME, y.YEAR, s.QUANTITY")
+		->result();
+	}
+
+	public function itemByChannelPercent() {
+		return $this->db->query("SELECT e.NAME || ' ' || e.SURNAME AS PRACOWNIK, py.TYPE AS PLATNOSC, SUM(p.PRICE) OVER (PARTITION BY p.ID_PRODUCT) sum_kwota, ROUND(100*p.PRICE/SUM(p.PRICE) OVER (PARTITION BY p.ID_PRODUCT),2) \"udzial\" FROM SALES s JOIN EMPLOYEES e ON s.ID_EMPLOYEES = e.ID_EMPLOYEES JOIN PRODUCT p ON s.ID_PRODUCT = p.ID_PRODUCT JOIN PAYMENT py ON s.ID_PAYMENT = py.ID_PAYMENT WHERE ROWNUM < 5000 GROUP BY e.NAME || ' ' || e.SURNAME, py.TYPE, p.PRICE, p.ID_PRODUCT")
+		->result();
+	}
+
+	public function resultQuery() {
+		$query = $this->input->post("queryarea");
+		if($query[0] == "D" || $query[0] == "d") die();
+		if(substr($query, -1) === ";") {
+			$query = substr($query, 0, -1);
+		}
+		$query = trim($query);
+		return $this->db->query($query)->result();
+	}
+
+	public function combinedQuery() {
+		$query = "SELECT ";
+		//foreach columns
+		//sum or count
+		$query .= " FROM SALES JOIN CLIENTS ON SALES.ID_CLIENTS = CLIENTS.ID_CLIENTS JOIN EMPLOYEES ON SALES.ID_EMPLOYEES = EMPLOYEES.ID_EMPLOYEES JOIN DATA ON SALES.ID_DATA = DATA.ID_DATA JOIN PRODUCT ON SALES.ID_PRODUCT = PRODUCT.ID_PRODUCT JOIN PAYMENT ON SALES.ID_PAYMENT = PAYMENT.ID_PAYMENT JOIN CHANNEL ON SALES.ID_CHANNEL = CHANNEL.ID_CHANNEL JOIN INVOICE ON SALES.ID_INVOICE = INVOICE.ID_INVOICE JOIN DAY_OF_WEEK ON DATA.ID_DAY_OF_THE_WEEK = DAY_OF_WEEK.DATA.ID_DAY_OF_THE_WEEK JOIN QUARTER ON DATA.ID_QUARTER = QUARTER.ID_QUARTER JOIN MONTH ON DATA.ID_MONTH = MONTH.ID_MONTH JOIN YEAR ON DATA.ID_YEAR = YEAR.ID_YEAR JOIN CATEGORY ON PRODUCT.ID_CATEGORY = CATEGORY.ID_CATEGORY JOIN PRODUCER ON PRODUCT.ID_PRODUCER = PRODUCER.ID_PRODUCER JOIN AUTHOR ON PRODUCT.ID_AUTHOR = AUTHOR.ID_AUTHOR GROUP BY ";
+		//$query .= rollup or cube
+		$query .= "(";
+		//foreach columns
+		$query .= ")";
+
+		return $this->db->query($query)->result();
+	}
 }
 
 /* End of file model_m.php */
